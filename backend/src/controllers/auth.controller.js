@@ -87,7 +87,7 @@ export async function registerFoodPartner(req, res) {
   if (isAccountAlreadyExists)
     return res.status(400).json({ message: "Food Partner already Registered" });
 
-  const hashedPassword = await bcrypt(password, 10);
+  const hashedPassword = await bcrypt.hash(password, 10);
   const foodPartner = await foodPartnerModel.create({
     name,
     email,
