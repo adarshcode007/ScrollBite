@@ -1,7 +1,9 @@
 import foodModel from "../models/fooditem.model.js";
 import userModel from "../models/user.model.js";
+import likeModel from "../models/likes.model.js";
 import { uploadFile } from "../services/storage.service.js";
 import { v4 as uuid } from "uuid";
+import saveModel from "../models/save.model.js";
 
 export async function createFood(req, res) {
   console.log(req.foodPartner);
@@ -28,5 +30,75 @@ export async function getFoodItems(req, res) {
   res.status(200).json({
     message: "Food Items fetched successfully",
     foodItems,
+  });
+}
+
+export async function likeFood(req, res) {
+  const { foodId } = req.body;
+  const user = req.user;
+
+  const isAlreadyLiked = await likeModel.findOne({
+    user: user._id,
+    food: foodId,
+  });
+
+  if (isAlreadyLiked) {
+    await likeModel.deleteOne({
+      user: user._id,
+      food: foodId,
+    });
+
+    await foodModel.findByIdAndUpdate(foodId, {
+      $inc: { likeCount: -1 },
+    });
+
+    return res.status(200).json({
+      message: "Food unliked successfully",
+    });
+  }
+
+  const like = await likeModel.create({
+    user: user._id,
+    food: foodId,
+  });
+
+  await foodModel.findByIdAndUpdate(foodId, {
+    $inc: { likeCount: 1 },
+  });
+
+  res.status(201).json({
+    message: "Food liked successfully",
+    like,
+  });
+}
+
+export async function saveFood(req, res) {
+  const { foodId } = req.body;
+  const user = req.user;
+
+  const isAlreadySaved = await saveModel.findOne({
+    user: user._id,
+    food: foodId,
+  });
+
+  if (isAlreadySaved) {
+    await saveModel.deleteOne({
+      user: user._id,
+      food: foodId,
+    });
+
+    return res.status(200).json({
+      message: "Food unsaved successfully",
+    });
+  }
+
+  const save = await saveModel.create({
+    user: user._id,
+    food: foodId,
+  });
+
+  res.status(201).json({
+    message: "Food saved successfully",
+    save,
   });
 }
