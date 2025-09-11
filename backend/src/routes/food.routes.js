@@ -6,6 +6,7 @@ import {
 import {
   createFood,
   getFoodItems,
+  getSaveFood,
   likeFood,
   saveFood,
 } from "../controllers/food.controller.js";
@@ -27,5 +28,7 @@ router.get("/", authUserMiddleware, getFoodItems);
 router.post("/like", authUserMiddleware, likeFood);
 
 router.post("/save", authUserMiddleware, saveFood);
+
+router.get("/save", authUserMiddleware, getSaveFood);
 
 export default router;
